@@ -6,37 +6,23 @@
         <div class="home">
           <br />
           <br />
-          <h1 class="title">Generate Topic</h1>
+          <h1 class="title">None Topic</h1>
           <br />
-          <div class="input-group">
-            <div class="form-outline">
-                <form class="contact-form row" @submit.prevent='GenerateTopics("sentence")'>
-                <div class="form-field col-lg-12 ">
-                    <input id="sentence" class="input-text js-input" type="sentence" v-model.trim="sentence" required>
-                    <label class="label" for="sentence" v-if="this.sentence==''">Input Sentence... </label>
-                </div> 
-                <div class="form-field col-lg-12">
-                    <input class="submit-btn" type="submit" value="Generate">
-                </div>
-            </form>
-            </div>
-          </div>
+    
           <br />
-          <h5 >Classified Under: {{this.classified}}</h5>
-          <h5 style="color:red">{{this.error}}</h5>
           <table class="table table-hover table-striped align-middle">
             <thead>
               <tr>
-                <th scope="col">Category </th>
-                <th scope="col">Percentage Contributed</th>
-                <th scope="col">Keywords</th>
+                <th scope="col">Topic Number </th>
+                <th scope="col">Keywords </th>
+                <th scope="col">Total Count</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>{{ this.topic["dominate_topic"]}}</td>
-                <td>{{ this.topic["perc_cont"] }}</td>
-                <td>{{ this.topic["keywords"] }}</td>
+              <tr v-for="item in collection" :key="item.count">
+                <td v-if = "item['count']>0">{{item["topicID"]}}</td>
+                <td v-if = "item['count']>0">{{item["keywords"]}}</td>
+                <td v-if = "item['count']>0">{{ item["count"] }}</td>
               </tr>
             </tbody>
           </table>
@@ -58,30 +44,38 @@ export default {
   },
   data() {
     return {
-      topic: {},
-      classified:'',
-      error:'',
-      sentence: ''
+      collection: [],
     };
   },
   methods: {
     // GenerateTopics() {
     //     console.log(this.sentence)
     // },
-    GenerateTopics(){
-      console.log("here")
-        axios.post("http://127.0.0.1:5000/orchestrator",{"sent":this.sentence })
+    // GenerateTopics(){
+    //   console.log("here")
+    //     axios.post("http://127.0.0.1:5000/orchestrator",{"sent":this.sentence })
+    //               .then(res=>{
+    //                 console.log(res.data)
+    //                 this.classified = res.data["task1"]
+    //                 this.topic = res.data["task2"]
+    //                 console.log( this.topic)
+    //               })
+    //           .catch(()=>{
+    //             this.error = "An Error Occured"
+    //           })
+    // }, 
+  },
+  mounted(){
+      axios.post("http://127.0.0.1:5000/getTopic",{"topic":"None" })
                   .then(res=>{
                     console.log(res.data)
-                    this.classified = res.data["task1"]
-                    this.topic = res.data["task2"]
-                    console.log( this.topic)
+                    this.collection = res.data.message
                   })
               .catch(()=>{
                 this.error = "An Error Occured"
               })
-    }, 
-  }
+    }
+  
 
 };
 </script>
