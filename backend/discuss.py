@@ -166,7 +166,7 @@ def orchestrator():
         task_1_result = lr.predict(pred_val)
         processed_val = lda_preprocess(sent)     
         sent_data = [dictionary.doc2bow(doc) for doc in [processed_val]]
-        lda_model =  models.LdaModel.load(r'C:\Users\wei-d\Documents\Y3S2\TextMining\Project\LDA Model Files\lda_model.model')
+        lda_model =  models.LdaModel.load(r'C:\Users\wei-d\Documents\Y3S2\TextMining\Project\LDA_model2\LDA_model.model')
         merged = get_dominant_topics(lda_model, lda_model[sent_data], pd.Series([processed_val]))
         dominate_topic = str(merged.iloc[0, 1])
         perc_contribute = str(merged.iloc[0,2])
