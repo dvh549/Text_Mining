@@ -24,7 +24,7 @@ def createMovieReview():
     try:
         toxic_only_train_shortlisted = pd.read_pickle('../../Pre-Processed Files/toxic_only_train_shortlisted_preprocessed.pkl')
         x = toxic_only_train_shortlisted["preprocessed_text"]
-        for index, value in x[:5000,].items():
+        for index, value in x[:1000,].items():
             invoke_http('http://127.0.0.1:5000/orchestrator', method="POST", json= {"sent":value})
             # print(value)
         return jsonify(

@@ -28,14 +28,14 @@
             <thead>
               <tr>
                 <th scope="col">Category </th>
-                <th scope="col">Percentage Contributed</th>
+                <!-- <th scope="col">Percentage Contributed</th> -->
                 <th scope="col">Keywords</th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <td>{{ this.topic["dominate_topic"]}}</td>
-                <td>{{ this.topic["perc_cont"] }}</td>
+                <!-- <td>{{ this.topic["perc_cont"] }}</td> -->
                 <td>{{ this.topic["keywords"] }}</td>
               </tr>
             </tbody>
@@ -114,7 +114,7 @@ export default {
 }
 .contact-form .input-text {
   display: block;
-  width: 100%;
+  width: 60em;
   height: 36px;
   border-width: 0 0 2px 0;
   border-color: #5543ca;

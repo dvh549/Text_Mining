@@ -1,6 +1,7 @@
 
 from itertools import count
 from tempfile import TemporaryFile
+from unittest import result
 import firebase_admin
 from firebase_admin import credentials, firestore, auth
 from flask import Flask, request, jsonify
@@ -21,6 +22,7 @@ import pyLDAvis
 import pyLDAvis.gensim_models
 import numpy as np 
 import operator
+from joblib import load
 
 cred = credentials.Certificate("secretKey.json")
 firebase_admin.initialize_app(cred)
@@ -55,6 +57,7 @@ def get_dominant_topics(lda_model, tpd, texts):
     
     return merged
 
+
 ## classification Task 1
 toxic_only_train_shortlisted = pd.read_pickle('../../Pre-Processed Files/toxic_only_train_shortlisted_preprocessed.pkl')
 X = toxic_only_train_shortlisted["preprocessed_text"]
@@ -65,14 +68,20 @@ tfidf_vec = TfidfVectorizer(ngram_range=(1,2), max_features=30000)
 tfidf_train = tfidf_vec.fit_transform(X_train)
 
 ##Topic Extraction Task 2
-global lda_preprocessed_comments
-lda_preprocessed_comments = toxic_only_train_shortlisted['preprocessed_text'].map(lda_preprocess)
-global dictionary
-dictionary = corpora.Dictionary(lda_preprocessed_comments)
+df = pd.read_csv(r'C:\Users\wei-d\Documents\Y3S2\TextMining\Project\topic_keywords.csv')
+topics={"topic1":' '.join(df.iloc[0,1:].to_numpy()),"topic2": " ".join(df.iloc[1,1:].to_numpy()),"topic3": " ".join(df.iloc[2,1:].to_numpy()), "topic4": " ".join(df.iloc[3,1:].to_numpy()), "topic5": " ".join(df.iloc[4,1:].to_numpy()), "topic6": " ".join(df.iloc[5,1:].to_numpy())  }
 
-dictionary.filter_extremes(no_below=10, no_above=0.5, keep_n=75000)
-global bow_corpus 
-bow_corpus = [dictionary.doc2bow(doc) for doc in lda_preprocessed_comments]
+print(topics)
+
+# global lda_preprocessed_comments
+# lda_preprocessed_comments = toxic_only_train_shortlisted['preprocessed_text'].map(lda_preprocess)
+# global dictionary
+# dictionary = corpora.Dictionary(lda_preprocessed_comments)
+
+# dictionary.filter_extremes(no_below=10, no_above=0.5, keep_n=75000)
+# global bow_corpus 
+# bow_corpus = [dictionary.doc2bow(doc) for doc in lda_preprocessed_comments]
+
 # global lda_model
 # lda_model = models.LdaMulticore(bow_corpus, num_topics=14,id2word=dictionary, passes=2, workers=2)
 
@@ -131,19 +140,27 @@ bow_corpus = [dictionary.doc2bow(doc) for doc in lda_preprocessed_comments]
 #     try:
 #         data = request.get_json()
 #         sent= data["sent"]
-#         processed_val = lda_preprocess(sent)
-#         sent_data = [dictionary.doc2bow(doc) for doc in [processed_val]]
-#         lda_model =  models.LdaModel.load(r'C:\Users\wei-d\Documents\Y3S2\TextMining\Project\LDA Model Files\lda_model.model')
-#         merged = get_dominant_topics(lda_model, lda_model[sent_data], pd.Series([processed_val]))
-#         dominate_topic = str(merged.iloc[0, 1])
-#         perc_contribute = str(merged.iloc[0,2])
-#         keywords = str(merged.iloc[0, 3])
-#         result = {"dominate_topic":dominate_topic, "perc_cont":perc_contribute, "keywords":keywords}
+#         # processed_val = lda_preprocess(sent)
+#         # sent_data = [dictionary.doc2bow(doc) for doc in [processed_val]]
+#         count_vectorizer = CountVectorizer()
+#         lda_count_vecs = count_vectorizer.fit_transform([sent])
         
+#         lda_model = load(r'C:\Users\wei-d\Documents\Y3S2\TextMining\Project\sklearn_lda.jl')
+#         for i in range(len([sent])):
+#             output = lda_model.fit_transform(lda_count_vecs[i])
+#             dominant_topic = np.argmax(output, axis=1)
+#             print("test doc" + str(i) + ": " + str(dominant_topic))
+#         dominant_topic = dominant_topic[0]
+#         # merged = get_dominant_topics(lda_model, lda_model[sent_data], pd.Series([processed_val]))
+#         # dominate_topic = str(merged.iloc[0, 1])
+#         # perc_contribute = str(merged.iloc[0,2])
+#         # keywords = str(merged.iloc[0, 3])
+#         # result = {"dominate_topic":dominate_topic, "perc_cont":perc_contribute, "keywords":keywords}
+#         print(type(dominant_topic))
 #         return jsonify (
 #                 {
 #                     "code": 200,
-#                     "message": result
+#                     "message": str(dominant_topic)
 #                 }
 #             ), 200
 #     except Exception as e:
@@ -164,18 +181,24 @@ def orchestrator():
         sent = data["sent"]  
         pred_val = tfidf_vec.transform([sent])
         task_1_result = lr.predict(pred_val)
-        processed_val = lda_preprocess(sent)     
-        sent_data = [dictionary.doc2bow(doc) for doc in [processed_val]]
-        lda_model =  models.LdaModel.load(r'C:\Users\wei-d\Documents\Y3S2\TextMining\Project\LDA_model2\LDA_model.model')
-        merged = get_dominant_topics(lda_model, lda_model[sent_data], pd.Series([processed_val]))
-        dominate_topic = str(merged.iloc[0, 1])
-        perc_contribute = str(merged.iloc[0,2])
-        keywords = str(merged.iloc[0, 3])
-        task_2_result = {"dominate_topic":dominate_topic, "perc_cont":perc_contribute, "keywords":keywords}
+        count_vectorizer = CountVectorizer()
+        lda_count_vecs = count_vectorizer.fit_transform([sent])
+        
+        lda_model = load(r'C:\Users\wei-d\Documents\Y3S2\TextMining\Project\sklearn_lda.jl')
+        for i in range(len([sent])):
+            output = lda_model.fit_transform(lda_count_vecs[i])
+            dominant_topic = np.argmax(output, axis=1)
+            print("test doc" + str(i) + ": " + str(dominant_topic))
+        dominant_topic = dominant_topic[0]
+        print(dominant_topic)
+
+        keywords =topics['topic'+str(dominant_topic+1)]
+        task_2_result = {"dominate_topic":str(dominant_topic+1), "keywords": keywords}
         doc_ref = db.collection(task_1_result[0]).document()
         doc_ref.set(data)
-        print(dominate_topic)
-        doc_ref2 = db.collection(task_1_result[0]+"Topic").document("Topic"+dominate_topic)
+        # print(dominant_topic)
+        print("Topic"+str(dominant_topic+1))
+        doc_ref2 = db.collection(task_1_result[0]+"Topic").document("Topic"+str(dominant_topic+1))
         doc = doc_ref2.get()
         # print(doc.to_dict())
         doc_data = doc.to_dict()
