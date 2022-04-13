@@ -59,7 +59,7 @@ def get_dominant_topics(lda_model, tpd, texts):
 
 
 ## classification Task 1
-toxic_only_train_shortlisted = pd.read_pickle('../../Pre-Processed Files/toxic_only_train_shortlisted_preprocessed.pkl')
+toxic_only_train_shortlisted = pd.read_pickle('webAppDatasets/toxic_only_train_shortlisted_preprocessed.pkl')
 X = toxic_only_train_shortlisted["preprocessed_text"]
 y = toxic_only_train_shortlisted["target"]
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
@@ -68,7 +68,7 @@ tfidf_vec = TfidfVectorizer(ngram_range=(1,2), max_features=30000)
 tfidf_train = tfidf_vec.fit_transform(X_train)
 
 ##Topic Extraction Task 2
-df = pd.read_csv(r'C:\Users\wei-d\Documents\Y3S2\TextMining\Project\topic_keywords.csv')
+df = pd.read_csv('webAppDatasets/topic_keywords.csv')
 topics={"topic1":' '.join(df.iloc[0,1:].to_numpy()),"topic2": " ".join(df.iloc[1,1:].to_numpy()),"topic3": " ".join(df.iloc[2,1:].to_numpy()), "topic4": " ".join(df.iloc[3,1:].to_numpy()), "topic5": " ".join(df.iloc[4,1:].to_numpy()), "topic6": " ".join(df.iloc[5,1:].to_numpy())  }
 
 
@@ -77,7 +77,7 @@ def orchestrator():
     try:
         data = request.get_json()
         print(data)
-        with open(r'C:\Users\wei-d\Documents\Y3S2\TextMining\Project\TM_Models\logreg_model.pkl' , 'rb') as f:
+        with open('webAppDatasets/logreg_model.pkl' , 'rb') as f:
             lr = pickle.load(f)
         sent = data["sent"]  
         pred_val = tfidf_vec.transform([sent])
@@ -85,7 +85,7 @@ def orchestrator():
         count_vectorizer = CountVectorizer()
         lda_count_vecs = count_vectorizer.fit_transform([sent])
         
-        lda_model = load(r'C:\Users\wei-d\Documents\Y3S2\TextMining\Project\sklearn_lda.jl')
+        lda_model = load('webAppDatasets/sklearn_lda.jl')
         for i in range(len([sent])):
             output = lda_model.fit_transform(lda_count_vecs[i])
             dominant_topic = np.argmax(output, axis=1)
